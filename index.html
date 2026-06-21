@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subhadeep Sengupta | Manga Dev Portfolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Noto+Sans:wght@700&display=swap" rel="stylesheet">
+    <title>Subhadip Sengupta | Cinematic Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
     <style>
-        /* === MANGA VARIABLES & RESET === */
+        /* === CORE VARIABLES & RESET === */
         :root {
-            --manga-black: #050505;
-            --manga-white: #fdfdfd;
-            --samurai-red: #e50000;
-            --halftone: radial-gradient(circle, #000 2px, transparent 2.5px);
+            --bg-color: #030305;
+            --accent-red: #e50914; /* Cinematic/Netflix red */
+            --text-light: #f5f5f5;
         }
 
         * {
@@ -20,412 +19,322 @@
             box-sizing: border-box;
         }
 
-        body, html {
-            background-color: var(--manga-white);
-            color: var(--manga-black);
-            font-family: 'Noto Sans', sans-serif;
-            overflow: hidden; /* Hide default scroll, handled by manga-book */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            font-family: 'Montserrat', sans-serif;
+            /* The body height creates the "timeline" length for scrolling */
+            height: 500vh; 
+            overflow-x: hidden;
         }
 
-        h1, h2, h3, .comic-font {
-            font-family: 'Bangers', cursive;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        /* Hide scrollbar for immersion */
+        ::-webkit-scrollbar { display: none; }
 
-        /* === HORIZONTAL SWAP ARCHITECTURE === */
-        .manga-book {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-snap-type: x mandatory;
-            scroll-behavior: smooth;
-            /* Hide scrollbar */
-            scrollbar-width: none; 
-            -ms-overflow-style: none;
-        }
-        .manga-book::-webkit-scrollbar {
-            display: none;
-        }
-
-        .page {
-            flex: 0 0 100vw;
-            height: 100vh;
-            scroll-snap-align: start;
-            padding: 2vw;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Manga Background Texture */
-        .bg-halftone {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: var(--halftone);
-            background-size: 10px 10px;
-            opacity: 0.1;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* === COMIC PANELS === */
-        .panel {
-            border: 5px solid var(--manga-black);
-            background: var(--manga-white);
-            box-shadow: 10px 10px 0px var(--manga-black);
+        /* === CINEMATIC VIEWPORT === */
+        .viewport {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
             overflow: hidden;
-            position: relative;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .panel:hover {
-            transform: translate(-5px, -5px);
-            box-shadow: 15px 15px 0px var(--samurai-red);
-        }
-
-        /* Panel Grid Layouts */
-        .grid-hero {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 20px;
-            height: 100%;
-        }
-
-        .panel-main {
-            grid-column: 1 / 2;
-            grid-row: 1 / 3;
+            perspective: 1000px; /* Creates 3D depth */
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            padding: 4rem;
-            background: linear-gradient(135deg, #fff 40%, #f0f0f0 100%);
+            background: radial-gradient(circle at center, #1a1a24 0%, var(--bg-color) 100%);
         }
 
-        /* === SPEED LINES ANIMATION === */
-        .speed-lines {
+        /* Video timeline progress bar */
+        .progress-bar {
+            position: fixed;
+            bottom: 0; left: 0;
+            height: 4px;
+            background: var(--accent-red);
+            width: 0%;
+            z-index: 9999;
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        .timecode {
+            position: fixed;
+            bottom: 20px; right: 30px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 9999;
+        }
+
+        /* === THE CAMERA RIG (Moves through Z-space) === */
+        .camera {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(90deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 12px);
-            opacity: 0;
-            transform: scale(1.2);
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-        }
-        
-        .page.active .speed-lines {
-            opacity: 1;
-            animation: speed 0.2s infinite alternate linear;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            /* Controlled by JS on scroll */
+            transform: translateZ(0px); 
+            will-change: transform;
         }
 
-        @keyframes speed {
-            from { transform: translateX(0) scale(1.2); }
-            to { transform: translateX(-10px) scale(1.2); }
-        }
-
-        /* === TYPOGRAPHY & ELEMENTS === */
-        .hero-title {
-            font-size: clamp(4rem, 10vw, 8rem);
-            line-height: 0.9;
-            text-shadow: 4px 4px 0px var(--samurai-red);
-            position: relative;
-            z-index: 2;
-            margin-bottom: 1rem;
-        }
-
-        .bubble {
-            background: var(--manga-white);
-            border: 4px solid var(--manga-black);
-            border-radius: 50%;
-            padding: 1.5rem 2rem;
-            position: absolute;
-            font-weight: bold;
-            box-shadow: 6px 6px 0px var(--manga-black);
-        }
-        .bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -15px; left: 20px;
-            border-width: 15px 15px 0;
-            border-style: solid;
-            border-color: var(--manga-black) transparent transparent transparent;
-            display: block;
-            width: 0;
-        }
-
-        /* === PAGE 2: SKILLS & PIE CHART === */
-        .grid-skills {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto 1fr;
-            gap: 20px;
-            height: 100%;
-        }
-        
-        .panel-full { grid-column: 1 / -1; padding: 2rem; text-align: center; }
-        .panel-chart { display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .panel-stats { padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
-
-        /* The Active Pie Chart */
-        .pie-chart {
-            width: clamp(200px, 20vw, 300px);
-            height: clamp(200px, 20vw, 300px);
-            border-radius: 50%;
-            border: 6px solid var(--manga-black);
-            box-shadow: 10px 10px 0px var(--manga-black);
-            /* Initial state */
-            background: conic-gradient(
-                var(--manga-black) 0% 0%, 
-                var(--samurai-red) 0% 0%, 
-                #ddd 0% 100%
-            );
-            position: relative;
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .pie-chart::before {
-            content: 'POWER LEVELS';
+        /* === SCENE CONTAINERS === */
+        .scene {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: var(--manga-white);
-            border: 4px solid var(--manga-black);
-            border-radius: 50%;
-            width: 60%; height: 60%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Bangers';
-            font-size: 1.5rem;
+            width: 80vw;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            line-height: 1;
+            opacity: 0; /* Hidden until camera approaches */
+            will-change: opacity, transform;
+            transition: opacity 0.5s ease-out;
         }
 
-        .skill-bar {
-            margin-bottom: 1.5rem;
-        }
-        .skill-name {
-            font-weight: 900; font-size: 1.2rem;
-            display: flex; justify-content: space-between;
-        }
-        .bar-bg {
-            height: 20px; border: 3px solid var(--manga-black);
-            background: #eee; margin-top: 5px; position: relative;
-        }
-        .bar-fill {
-            height: 100%; background: var(--manga-black);
-            width: 0%; /* Set via JS */
-            transition: width 1.5s cubic-bezier(0.1, 0.9, 0.2, 1);
+        /* Position scenes deep in the Z-axis */
+        #scene-1 { transform: translate(-50%, -50%) translateZ(0px); }
+        #scene-2 { transform: translate(-50%, -50%) translateZ(-1500px); }
+        #scene-3 { transform: translate(-50%, -50%) translateZ(-3000px); flex-direction: row; gap: 4rem; }
+        #scene-4 { transform: translate(-50%, -50%) translateZ(-4500px); }
+
+        /* === TYPOGRAPHY & CINEMATIC EFFECTS === */
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            text-transform: uppercase;
         }
 
-        /* === SLANTED ACTION PANELS === */
-        .panel-image {
-            background-size: cover;
-            background-position: center;
-            filter: grayscale(100%) contrast(120%);
-            transition: filter 0.3s;
-        }
-        .panel-image:hover {
-            filter: grayscale(0%) contrast(100%);
+        .title-main {
+            font-size: clamp(3rem, 8vw, 6rem);
+            letter-spacing: 0.5rem;
+            text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
+            margin-bottom: 1rem;
         }
 
-        /* Pagination Navigator */
-        .page-indicator {
-            position: fixed;
-            bottom: 2rem; right: 2rem;
-            background: var(--samurai-red);
-            color: white;
-            border: 4px solid var(--manga-black);
-            padding: 10px 20px;
-            font-family: 'Bangers';
-            font-size: 2rem;
-            z-index: 100;
-            box-shadow: 5px 5px 0px var(--manga-black);
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            letter-spacing: 0.3rem;
+            color: #aaa;
+            font-weight: 300;
         }
 
-        /* Media Queries for Mobile Manga Reading */
-        @media (max-width: 768px) {
-            .grid-hero, .grid-skills {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto;
-            }
-            .panel-main { grid-column: 1; grid-row: 1; padding: 2rem; }
-            .hero-title { font-size: 3.5rem; }
-            .manga-book {
-                scroll-snap-type: y mandatory; /* Vertical scroll on mobile */
-                overflow-y: auto; overflow-x: hidden;
-            }
-            .page { flex-direction: column; height: 100vh; scroll-snap-align: start; }
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.8;
+        }
+        .glitch-text::before { color: #0ff; z-index: -1; transform: translate(-2px, 2px); }
+        .glitch-text::after { color: var(--accent-red); z-index: -2; transform: translate(2px, -2px); }
+
+        /* === ACTIVE PIE CHART (CINEMATIC HUD STYLE) === */
+        .hud-chart-container {
+            position: relative;
+            width: 300px; height: 300px;
+        }
+
+        .pie-chart {
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(transparent 0%, transparent 100%);
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 50px rgba(229, 9, 20, 0.2);
+            position: relative;
+        }
+
+        .pie-chart::after {
+            content: 'SYS.STATS';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 75%; height: 75%;
+            background: var(--bg-color);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: monospace; font-size: 1.2rem; color: var(--accent-red);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+        }
+
+        .stats-list {
+            text-align: left;
+            font-family: monospace;
+            font-size: 1.2rem;
+            line-height: 2;
+        }
+        .stats-list span { color: var(--accent-red); font-weight: bold; }
+
+        /* Cinematic Background Particles */
+        #particle-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.4;
         }
     </style>
 </head>
 <body>
 
-    <!-- Pagination floating widget -->
-    <div class="page-indicator" id="pager">PAGE 1/4</div>
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="timecode" id="timecode">00:00:00:00</div>
 
-    <div class="manga-book" id="mangaBook">
+    <div class="viewport">
+        <canvas id="particle-canvas"></canvas>
+        
+        <div class="camera" id="camera">
+            
+            <div class="scene" id="scene-1">
+                <h2 class="subtitle" style="margin-bottom: 1rem;">INITIATING SEQUENCE</h2>
+                <h1 class="title-main glitch-text" data-text="SUBHADEEP SENGUPTA">SUBHADEEP SENGUPTA</h1>
+                <p class="subtitle">SCROLL TO PLAY</p>
+            </div>
 
-        <!-- PAGE 1: HERO OVERTURE -->
-        <section class="page" id="page1">
-            <div class="bg-halftone"></div>
-            <div class="speed-lines"></div>
-            <div class="grid-hero">
-                <div class="panel panel-main">
-                    <div class="bubble" style="top: -20px; left: -20px; transform: rotate(-10deg);">
-                        WAKE UP, SAMURAI!
-                    </div>
-                    <h1 class="hero-title">SUBHADEEP<br>SENGUPTA</h1>
-                    <h2 style="font-size: 2rem; color: var(--samurai-red);">BCA Scholar // Code Ronin // 3D Creator</h2>
-                    <p style="margin-top: 1rem; font-size: 1.2rem; max-width: 400px; font-weight: bold;">
-                        Forged in C & Java. Bending reality with Blender Geometry Nodes. Building the digital future one panel at a time.
-                    </p>
+            <div class="scene" id="scene-2">
+                <h1 class="title-main" style="font-size: 4rem; color: var(--accent-red);">BCA SCHOLAR</h1>
+                <h2 class="subtitle" style="font-size: 2rem; color: #fff;">DATM FRAMEWORK</h2>
+                <p style="margin-top: 2rem; max-width: 600px; font-size: 1.2rem; line-height: 1.6; color: #aaa;">
+                    Forged in the disciplines of C and Java architecture. Building robust frameworks while grounding logic in Discrete Mathematics and Linear Algebra.
+                </p>
+            </div>
+
+            <div class="scene" id="scene-3">
+                <div class="hud-chart-container">
+                    <div class="pie-chart" id="hudChart"></div>
                 </div>
-                <div class="panel panel-image" style="background-image: url('https://images.unsplash.com/photo-1542051812871-757500820464?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
-                    <!-- Anime/Samurai visual proxy -->
-                </div>
-                <div class="panel" style="display: flex; align-items: center; justify-content: center; background: var(--manga-black); color: var(--manga-white);">
-                    <h2 style="font-size: 3rem; transform: rotate(-5deg);">SCROLL TO BEGIN<br>&#10140;</h2>
+                <div class="stats-list">
+                    <div>> Java/C Logic <span>[ 85% ]</span></div>
+                    <div>> Blender 3D Nodes <span>[ 90% ]</span></div>
+                    <div>> Android Studio <span>[ 70% ]</span></div>
+                    <div>> Applied Math <span>[ 80% ]</span></div>
+                    <div style="margin-top: 2rem; font-size: 0.9rem; color: #666;">// RENDERING GEOMETRY_NODES.EXE</div>
                 </div>
             </div>
-        </section>
 
-        <!-- PAGE 2: SKILLS & ACTIVE PIE CHART -->
-        <section class="page" id="page2">
-            <div class="bg-halftone"></div>
-            <div class="grid-skills">
-                <div class="panel panel-full">
-                    <h1 style="font-size: 4rem; text-shadow: 3px 3px 0px var(--samurai-red);">MY ARSENAL</h1>
-                </div>
-                <div class="panel panel-chart">
-                    <!-- The active pie chart. Filled via IntersectionObserver -->
-                    <div class="pie-chart" id="skillChart"></div>
-                </div>
-                <div class="panel panel-stats">
-                    <div class="skill-bar">
-                        <div class="skill-name"><span>Java / C Programming</span><span>85%</span></div>
-                        <div class="bar-bg"><div class="bar-fill" data-width="85"></div></div>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-name"><span>Android Studio</span><span>70%</span></div>
-                        <div class="bar-bg"><div class="bar-fill" data-width="70" style="background: var(--samurai-red);"></div></div>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-name"><span>Blender 3D</span><span>90%</span></div>
-                        <div class="bar-bg"><div class="bar-fill" data-width="90"></div></div>
-                    </div>
-                    <div class="skill-bar">
-                        <div class="skill-name"><span>Applied Math</span><span>80%</span></div>
-                        <div class="bar-bg"><div class="bar-fill" data-width="80"></div></div>
-                    </div>
-                </div>
+            <div class="scene" id="scene-4">
+                <h1 class="title-main glitch-text" data-text="AWAITING INPUT">AWAITING INPUT</h1>
+                <p class="subtitle" style="margin-bottom: 3rem;">THE NEXT RENDER BEGINS NOW</p>
+                <a href="#" style="padding: 1rem 3rem; border: 1px solid var(--accent-red); color: white; text-decoration: none; font-family: monospace; letter-spacing: 0.2rem; background: rgba(229, 9, 20, 0.1);">CONTACT.SH</a>
             </div>
-        </section>
 
-        <!-- PAGE 3: PROJECTS -->
-        <section class="page" id="page3">
-            <div class="bg-halftone"></div>
-            <div class="grid-hero">
-                <div class="panel panel-image" style="background-image: url('https://images.unsplash.com/photo-1555680202-c86f0e12f086?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'); grid-column: 1 / 3;">
-                     <div style="position: absolute; bottom: 20px; left: 20px; background: var(--manga-white); padding: 10px; border: 4px solid var(--manga-black);">
-                         <h2>PROJECT ALPHA: THE ENGINE</h2>
-                     </div>
-                </div>
-                <div class="panel panel-image" style="background-image: url('https://images.unsplash.com/photo-1618331835717-801e976710b2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
-                    <div style="position: absolute; top: 20px; right: 20px; background: var(--samurai-red); color: white; padding: 10px; border: 4px solid var(--manga-black);">
-                        <h2>3D GEOMETRY NODES</h2>
-                    </div>
-                </div>
-                <div class="panel" style="padding: 2rem; display: flex; flex-direction: column; justify-content: center;">
-                    <h2>Algorithm Optimization</h2>
-                    <p style="font-weight: bold; margin-top: 1rem;">Cutting through runtime complexities like a katana through bamboo. Implemented advanced graph traversal frameworks.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- PAGE 4: CONTACT / CLIFFHANGER -->
-        <section class="page" id="page4">
-            <div class="bg-halftone"></div>
-            <div class="speed-lines"></div>
-            <div style="display: flex; width: 100%; height: 100%; border: 5px solid var(--manga-black); background: var(--manga-black); color: var(--manga-white); align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                <div style="text-align: center; z-index: 2;">
-                    <h1 style="font-size: 8vw; line-height: 1; color: var(--samurai-red);">TO BE CONTINUED...</h1>
-                    <h2 style="font-size: 2rem; margin-top: 2rem;">READY TO FORGE A NEW ALLIANCE?</h2>
-                    <p style="font-size: 1.5rem; margin-top: 1rem;">subhadeep@example.com // GitHub: @CodeRonin</p>
-                </div>
-            </div>
-        </section>
-
+        </div>
     </div>
 
     <script>
-        const mangaBook = document.getElementById('mangaBook');
-        const pages = document.querySelectorAll('.page');
-        const pager = document.getElementById('pager');
-        const chart = document.getElementById('skillChart');
+        // === 1. VIDEO SCROLL & CAMERA FLY-THROUGH LOGIC ===
+        const camera = document.getElementById('camera');
+        const progressBar = document.getElementById('progressBar');
+        const timecode = document.getElementById('timecode');
+        const hudChart = document.getElementById('hudChart');
+        const scenes = document.querySelectorAll('.scene');
+        
+        // Define how far apart scenes are on the Z-axis (matches CSS)
+        const sceneDepths = [0, -1500, -3000, -4500];
+        
+        // Map scroll pixel distance to Z-axis movement
+        // 1 pixel scrolled = 2px moved in 3D space
+        const scrollSpeedMultiplier = 2; 
 
-        // 1. Convert Vertical Scroll to Horizontal Scroll (Desktop)
-        mangaBook.addEventListener('wheel', (e) => {
-            if (window.innerWidth > 768) {
-                e.preventDefault();
-                mangaBook.scrollBy({
-                    left: e.deltaY > 0 ? window.innerWidth : -window.innerWidth,
-                    behavior: 'smooth'
-                });
-            }
-        });
+        window.addEventListener('scroll', () => {
+            // Calculate scroll percentage
+            const scrollTop = window.scrollY;
+            const maxScroll = document.body.scrollHeight - window.innerHeight;
+            const scrollPercent = scrollTop / maxScroll;
+            
+            // Update UI Progress Bar
+            progressBar.style.width = `${scrollPercent * 100}%`;
+            
+            // Update Fake Timecode
+            const frames = Math.floor(scrollPercent * 2400); // simulate 24fps over 100 seconds
+            const s = Math.floor(frames / 24) % 60;
+            const m = Math.floor(frames / (24 * 60));
+            const f = frames % 24;
+            timecode.innerText = `00:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${f.toString().padStart(2, '0')}`;
 
-        // 2. Intersection Observer for Video-like Animations & Pager
-        const observerOptions = {
-            root: mangaBook,
-            threshold: 0.5 // Trigger when 50% of the page is visible
-        };
+            // Move the camera forward
+            const zMovement = scrollTop * scrollSpeedMultiplier;
+            camera.style.transform = `translateZ(${zMovement}px)`;
 
-        const pageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    // Add active class for speed lines
-                    entry.target.classList.add('active');
+            // Manage Scene Opacity based on proximity to the camera
+            scenes.forEach((scene, index) => {
+                const sceneZ = Math.abs(sceneDepths[index]); // Positive distance value
+                const distanceToCamera = sceneZ - zMovement;
+                
+                // Fade in when 800px away, fade out when passed
+                if (distanceToCamera < 800 && distanceToCamera > -300) {
+                    // Normalize opacity between 0 and 1
+                    let opacity = 1 - (Math.abs(distanceToCamera) / 800);
+                    scene.style.opacity = Math.max(0, opacity);
                     
-                    // Update Pager
-                    const pageIndex = Array.from(pages).indexOf(entry.target) + 1;
-                    pager.innerText = `PAGE ${pageIndex}/${pages.length}`;
-
-                    // If Page 2, animate the Active Pie Chart & Skill Bars
-                    if (entry.target.id === 'page2') {
-                        // Animate Pie Chart via CSS custom property or conic-gradient redraw
-                        // Breakdowns: Java 40%, Blender 30%, Math 15%, Android 15%
-                        setTimeout(() => {
-                            chart.style.background = `conic-gradient(
-                                var(--samurai-red) 0% 40%, 
-                                var(--manga-black) 40% 70%, 
-                                #666 70% 85%, 
-                                #aaa 85% 100%
-                            )`;
-                            chart.style.transform = 'scale(1.05) rotate(360deg)';
-                        }, 200);
-
-                        // Animate skill bars
-                        const bars = entry.target.querySelectorAll('.bar-fill');
-                        bars.forEach(bar => {
-                            bar.style.width = bar.getAttribute('data-width') + '%';
-                        });
+                    // Trigger Active Pie Chart when Scene 3 is close
+                    if (index === 2 && opacity > 0.5) {
+                        hudChart.style.background = `conic-gradient(
+                            var(--accent-red) 0% 40%, 
+                            #444 40% 70%, 
+                            #222 70% 85%, 
+                            #111 85% 100%
+                        )`;
+                        hudChart.style.transform = 'scale(1.05)';
+                        hudChart.style.transition = 'all 1s cubic-bezier(0.1, 0.9, 0.2, 1)';
                     }
                 } else {
-                    entry.target.classList.remove('active');
-                    // Reset Chart for replayability
-                    if (entry.target.id === 'page2') {
-                        chart.style.background = `conic-gradient(var(--manga-black) 0% 0%, var(--samurai-red) 0% 0%, #ddd 0% 100%)`;
-                        chart.style.transform = 'scale(1) rotate(0deg)';
-                        const bars = entry.target.querySelectorAll('.bar-fill');
-                        bars.forEach(bar => bar.style.width = '0%');
+                    scene.style.opacity = 0;
+                    if (index === 2) {
+                        hudChart.style.background = 'conic-gradient(transparent 0%, transparent 100%)';
+                        hudChart.style.transform = 'scale(1)';
                     }
                 }
             });
-        }, observerOptions);
+        });
 
-        pages.forEach(page => pageObserver.observe(page));
+        // Trigger initial scroll calculation on load
+        window.dispatchEvent(new Event('scroll'));
+
+        // === 2. CINEMATIC PARTICLE BACKGROUND (GEOMETRY NODES VIBE) ===
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        for(let i = 0; i < 100; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                z: Math.random() * 2, // Speed/Depth
+                radius: Math.random() * 1.5
+            });
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Move particles toward the viewer (simulating space/nodes)
+                p.y += p.z * 2;
+                p.x += (p.x - canvas.width/2) * 0.005; // slight radial spread
+                
+                // Reset if off screen
+                if(p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
+                    p.y = 0;
+                    p.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
