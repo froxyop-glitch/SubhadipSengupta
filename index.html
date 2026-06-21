@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subhadeep Sengupta - Portfolio</title>
+    <style>
+        /* === CSS VARIABLES & RESET === */
+        :root {
+            --blood-red: #8a0303;
+            --dark-void: #0a0a0a;
+            --blade-silver: #e0e0e0;
+            --text-main: #f5f5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cinzel', serif, system-ui;
+        }
+
+        body, html {
+            background-color: var(--dark-void);
+            color: var(--text-main);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar for immersion */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--dark-void);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--blood-red);
+        }
+
+        /* === HERO SECTION: FOREST ZOOM === */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* The Forest Backgrounds */
+        .forest-bg, .forest-fg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            will-change: transform;
+            z-index: 1;
+        }
+
+        /* Background trees moving slower */
+        .forest-bg {
+            background-image: linear-gradient(rgba(10, 10, 10, 0.7), rgba(10, 10, 10, 0.9)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            transform-origin: center;
+        }
+
+        /* Foreground vignette/particles */
+        .forest-fg {
+            background: radial-gradient(circle at center, transparent 30%, var(--dark-void) 100%);
+            z-index: 2;
+        }
+
+        /* Hero Content */
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            padding: 0 1rem;
+        }
+
+        h1.title {
+            /* Using clamp so the longer name scales down on mobile */
+            font-size: clamp(2.5rem, 6vw, 4.5rem); 
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
+            letter-spacing: 0.2rem;
+            color: var(--blade-silver);
+            margin-bottom: 3rem;
+        }
+
+        /* Katana Button */
+        .btn-draw {
+            background: transparent;
+            color: var(--text-main);
+            border: 2px solid var(--blood-red);
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-draw::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--blood-red);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: -1;
+        }
+
+        .btn-draw:hover::before {
+            left: 0;
+        }
+
+        .btn-draw:hover {
+            box-shadow: 0 0 20px rgba(138, 3, 3, 0.6);
+        }
+
+        /* === SWORD SLASH ANIMATION OVERLAY === */
+        .slash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: none; /* Hidden by default */
+        }
+
+        .slash-half {
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background-color: var(--dark-void);
+            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .slash-top {
+            top: 0;
+            border-bottom: 2px solid var(--blade-silver);
+            transform-origin: bottom;
+        }
+
+        .slash-bottom {
+            bottom: 0;
+            border-top: 2px solid var(--blade-silver);
+            transform-origin: top;
+        }
+
+        /* The flash of the blade */
+        .blade-flash {
+            position: absolute;
+            top: 50%;
+            left: -100%;
+            width: 200%;
+            height: 4px;
+            background: #fff;
+            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.8);
+            transform: translateY(-50%) rotate(-5deg);
+            z-index: 10000;
+            opacity: 0;
+        }
+
+        /* Active animation classes applied via JS */
+        .is-slashing .slash-overlay {
+            display: block;
+        }
+        
+        .is-slashing .blade-flash {
+            animation: slashStrike 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        }
+
+        .is-slashing .slash-top {
+            animation: splitTop 1s 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+
+        .is-slashing .slash-bottom {
+            animation: splitBottom 1s 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        }
+
+        @keyframes slashStrike {
+            0% { left: -100%; opacity: 1; }
+            50% { left: 50%; opacity: 1; height: 10px; }
+            100% { left: 200%; opacity: 0; }
+        }
+
+        @keyframes splitTop {
+            to { transform: translateY(-100%) rotate(-2deg); opacity: 0; }
+        }
+
+        @keyframes splitBottom {
+            to { transform: translateY(100%) rotate(2deg); opacity: 0; }
+        }
+
+        /* === PORTFOLIO CONTENT === */
+        .portfolio-section {
+            padding: 5rem 2rem;
+            min-height: 100vh;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png') var(--dark-void);
+            display: none; /* Revealed after slash */
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s ease;
+        }
+
+        .portfolio-section.revealed {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--blood-red);
+            margin-bottom: 4rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--blood-red);
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.4s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--blood-red);
+        }
+
+        .card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #aaa;
+            line-height: 1.6;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <section class="hero" id="hero">
+        <div class="forest-bg" id="forest-bg"></div>
+        <div class="forest-fg" id="forest-fg"></div>
+        
+        <div class="hero-content" id="hero-content">
+            <h1 class="title">Subhadeep Sengupta</h1>
+            <p class="subtitle">BCA Scholar at DATM. Java & C Developer. 3D Creator.</p>
+            <button class="btn-draw" id="draw-sword">Draw Blade</button>
+        </div>
+    </section>
+
+    <div class="slash-overlay">
+        <div class="blade-flash"></div>
+        <div class="slash-half slash-top"></div>
+        <div class="slash-half slash-bottom"></div>
+    </div>
+
+    <section class="portfolio-section" id="portfolio">
+        <h2 class="section-title">The Path of the Developer</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Core Programming</h3>
+                <p>Forged in the disciplines of C, Java, and complex Data Structures. Building robust frameworks and exploring environments like Android Studio.</p>
+            </div>
+            <div class="card">
+                <h3>3D & Visual Arts</h3>
+                <p>Crafting digital realities through Blender 3D Geometry Nodes, cinematic aesthetics, and advanced image manipulation techniques.</p>
+            </div>
+            <div class="card">
+                <h3>Applied Mathematics</h3>
+                <p>Grounding logic and algorithms in the rigorous study of Discrete Mathematics, Linear Algebra, and Calculus.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // --- Parallax "Zooming out of Trees" Scroll Effect ---
+        const forestBg = document.getElementById('forest-bg');
+        const heroContent = document.getElementById('hero-content');
+
+        window.addEventListener('scroll', () => {
+            let scrollY = window.scrollY;
+            
+            // Zoom the background slightly as you scroll to create depth
+            forestBg.style.transform = `scale(${1 + scrollY * 0.001})`;
+            
+            // Fade out the hero text on scroll
+            heroContent.style.opacity = 1 - (scrollY * 0.003);
+            heroContent.style.transform = `translateY(${scrollY * 0.5}px)`;
+        });
+
+        // --- "Sword Opening" Click Animation ---
+        const drawBtn = document.getElementById('draw-sword');
+        const portfolio = document.getElementById('portfolio');
+        const hero = document.getElementById('hero');
+
+        drawBtn.addEventListener('click', () => {
+            // 1. Trigger the slash animation by adding class to body
+            document.body.classList.add('is-slashing');
+
+            // 2. Hide the hero section and show portfolio behind the slashing screens
+            setTimeout(() => {
+                hero.style.display = 'none';
+                window.scrollTo(0, 0); // Reset scroll
+                portfolio.classList.add('revealed');
+            }, 400); // Trigger exactly when the blade flash crosses the screen
+
+            // 3. Clean up the animation classes after it finishes so user can interact normally
+            setTimeout(() => {
+                document.body.classList.remove('is-slashing');
+                // Hide overlay entirely so it doesn't block clicks
+                document.querySelector('.slash-overlay').style.display = 'none'; 
+            }, 1500); 
+        });
+    </script>
+</body>
+</html>
