@@ -3,97 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subhadip Sengupta | Full-Stack Developer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+    <title>Subhadip Sengupta | Portfolio</title>
     <style>
-        :root {
-            --bg-color: #060606;
-            --text-main: #e8e8e8;
-            --text-muted: #666;
-            --accent: #ff3333;
+        :root { --bg: #060606; --text: #e8e8e8; --accent: #ff3333; }
+        
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Inter', sans-serif; line-height: 1.6;
+            margin: 0; padding: 0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
-        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; }
+        /* Responsive Navigation */
+        nav { padding: 2rem 5vw; display: flex; justify-content: space-between; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
 
-        /* --- Cursor --- */
-        .cursor-dot { position: fixed; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; }
-        .cursor-ring { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; pointer-events: none; z-index: 9999; transition: width 0.2s, height 0.2s; }
-
-        /* --- Smooth Layout --- */
-        #scroll-container { position: fixed; top: 0; left: 0; width: 100%; will-change: transform; }
-        .section { min-height: 100vh; padding: 20vh 5vw; display: flex; flex-direction: column; justify-content: center; }
-
-        /* --- Typographic Elements --- */
-        h1 { font-family: 'Playfair Display', serif; font-size: clamp(4rem, 12vw, 9rem); font-weight: 400; line-height: 0.9; }
-        .meta-data { font-family: monospace; color: var(--accent); font-size: 0.8rem; letter-spacing: 0.2em; margin-bottom: 2rem; }
+        /* Fluid Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5vw; }
         
-        .grid-project { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-        .tech-tag { border: 1px solid #333; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-right: 0.5rem; }
+        /* Mobile First Grid */
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 2rem; 
+        }
+
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        h1 { font-size: clamp(3rem, 8vw, 7rem); line-height: 1; }
     </style>
 </head>
 <body>
 
-    <div class="cursor-dot" id="dot"></div>
-    <div class="cursor-ring" id="ring"></div>
+    <nav>
+        <div>SUBHADIP.DEV</div>
+        <ul class="nav-links">
+            <li>Work</li>
+            <li>Stack</li>
+            <li>Contact</li>
+        </ul>
+    </nav>
 
-    <div id="scroll-spacer"></div>
-    <main id="scroll-container">
-        
-        <section class="section">
-            <div class="meta-data">DEVELOPER PROFILE // V2.0</div>
-            <h1>Subhadip<br><span style="font-style: italic;">Sengupta</span></h1>
-            <p style="margin-top: 2rem; color: var(--text-muted); max-width: 500px;">
-                Specializing in high-performance web architecture, C/Java backend logic, and 3D procedural generation.
-            </p>
+    <main class="container">
+        <section style="height: 80vh; display: flex; flex-direction: column; justify-content: center;">
+            <div style="color: var(--accent);">DEVELOPER PROFILE</div>
+            <h1>Subhadip<br>Sengupta</h1>
         </section>
-
-        <section class="section">
-            <div class="grid-project">
-                <div>
-                    <h2 style="font-size: 2rem; margin-bottom: 2rem;">Engineered Solutions</h2>
-                    <div class="tech-tag">Java/C</div>
-                    <div class="tech-tag">Blender 3D</div>
-                    <div class="tech-tag">Android Studio</div>
-                </div>
-                <div>
-                    <p style="line-height: 1.8; color: var(--text-muted);">
-                        I build interfaces that feel alive. By utilizing custom linear interpolation and scroll-triggered GPU acceleration, 
-                        I transform static data into fluid, interactive experiences.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <script>
-        // Smooth scroll physics
-        const container = document.getElementById('scroll-container');
-        const spacer = document.getElementById('scroll-spacer');
-        let y = 0; let targetY = 0;
         
-        window.addEventListener('scroll', () => targetY = window.scrollY);
-        
-        function animate() {
-            y += (targetY - y) * 0.08;
-            container.style.transform = `translateY(-${y}px)`;
-            requestAnimationFrame(animate);
-        }
-        
-        // Dynamic resize for spacer
-        window.addEventListener('resize', () => spacer.style.height = container.offsetHeight + 'px');
-        spacer.style.height = container.offsetHeight + 'px';
-
-        // Cursor logic
-        const dot = document.getElementById('dot');
-        const ring = document.getElementById('ring');
-        window.addEventListener('mousemove', e => {
-            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-            ring.style.transform = `translate(${e.clientX - 17}px, ${e.clientY - 17}px)`;
-        });
-
-        animate();
-    </script>
+        </main>
 </body>
 </html>
