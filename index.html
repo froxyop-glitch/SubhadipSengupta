@@ -3,338 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subhadip Sengupta | Cinematic Portfolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
+    <title>Subhadip Sengupta | Full-Stack Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
     <style>
-        /* === CORE VARIABLES & RESET === */
         :root {
-            --bg-color: #030305;
-            --accent-red: #e50914; /* Cinematic/Netflix red */
-            --text-light: #f5f5f5;
+            --bg-color: #060606;
+            --text-main: #e8e8e8;
+            --text-muted: #666;
+            --accent: #ff3333;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { background-color: var(--bg-color); color: var(--text-main); font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            font-family: 'Montserrat', sans-serif;
-            /* The body height creates the "timeline" length for scrolling */
-            height: 500vh; 
-            overflow-x: hidden;
-        }
+        /* --- Cursor --- */
+        .cursor-dot { position: fixed; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-ring { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; pointer-events: none; z-index: 9999; transition: width 0.2s, height 0.2s; }
 
-        /* Hide scrollbar for immersion */
-        ::-webkit-scrollbar { display: none; }
+        /* --- Smooth Layout --- */
+        #scroll-container { position: fixed; top: 0; left: 0; width: 100%; will-change: transform; }
+        .section { min-height: 100vh; padding: 20vh 5vw; display: flex; flex-direction: column; justify-content: center; }
 
-        /* === CINEMATIC VIEWPORT === */
-        .viewport {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            overflow: hidden;
-            perspective: 1000px; /* Creates 3D depth */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at center, #1a1a24 0%, var(--bg-color) 100%);
-        }
-
-        /* Video timeline progress bar */
-        .progress-bar {
-            position: fixed;
-            bottom: 0; left: 0;
-            height: 4px;
-            background: var(--accent-red);
-            width: 0%;
-            z-index: 9999;
-            box-shadow: 0 0 10px var(--accent-red);
-        }
-
-        .timecode {
-            position: fixed;
-            bottom: 20px; right: 30px;
-            font-family: monospace;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.5);
-            z-index: 9999;
-        }
-
-        /* === THE CAMERA RIG (Moves through Z-space) === */
-        .camera {
-            position: absolute;
-            width: 100%; height: 100%;
-            transform-style: preserve-3d;
-            /* Controlled by JS on scroll */
-            transform: translateZ(0px); 
-            will-change: transform;
-        }
-
-        /* === SCENE CONTAINERS === */
-        .scene {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            opacity: 0; /* Hidden until camera approaches */
-            will-change: opacity, transform;
-            transition: opacity 0.5s ease-out;
-        }
-
-        /* Position scenes deep in the Z-axis */
-        #scene-1 { transform: translate(-50%, -50%) translateZ(0px); }
-        #scene-2 { transform: translate(-50%, -50%) translateZ(-1500px); }
-        #scene-3 { transform: translate(-50%, -50%) translateZ(-3000px); flex-direction: row; gap: 4rem; }
-        #scene-4 { transform: translate(-50%, -50%) translateZ(-4500px); }
-
-        /* === TYPOGRAPHY & CINEMATIC EFFECTS === */
-        h1, h2 {
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-        }
-
-        .title-main {
-            font-size: clamp(3rem, 8vw, 6rem);
-            letter-spacing: 0.5rem;
-            text-shadow: 0 0 30px rgba(229, 9, 20, 0.5);
-            margin-bottom: 1rem;
-        }
-
-        .subtitle {
-            font-size: clamp(1rem, 2vw, 1.5rem);
-            letter-spacing: 0.3rem;
-            color: #aaa;
-            font-weight: 300;
-        }
-
-        .glitch-text {
-            position: relative;
-            display: inline-block;
-        }
+        /* --- Typographic Elements --- */
+        h1 { font-family: 'Playfair Display', serif; font-size: clamp(4rem, 12vw, 9rem); font-weight: 400; line-height: 0.9; }
+        .meta-data { font-family: monospace; color: var(--accent); font-size: 0.8rem; letter-spacing: 0.2em; margin-bottom: 2rem; }
         
-        .glitch-text::before, .glitch-text::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.8;
-        }
-        .glitch-text::before { color: #0ff; z-index: -1; transform: translate(-2px, 2px); }
-        .glitch-text::after { color: var(--accent-red); z-index: -2; transform: translate(2px, -2px); }
-
-        /* === ACTIVE PIE CHART (CINEMATIC HUD STYLE) === */
-        .hud-chart-container {
-            position: relative;
-            width: 300px; height: 300px;
-        }
-
-        .pie-chart {
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(transparent 0%, transparent 100%);
-            border: 2px solid rgba(255,255,255,0.1);
-            box-shadow: 0 0 50px rgba(229, 9, 20, 0.2);
-            position: relative;
-        }
-
-        .pie-chart::after {
-            content: 'SYS.STATS';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 75%; height: 75%;
-            background: var(--bg-color);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: monospace; font-size: 1.2rem; color: var(--accent-red);
-            border: 1px solid rgba(229, 9, 20, 0.3);
-        }
-
-        .stats-list {
-            text-align: left;
-            font-family: monospace;
-            font-size: 1.2rem;
-            line-height: 2;
-        }
-        .stats-list span { color: var(--accent-red); font-weight: bold; }
-
-        /* Cinematic Background Particles */
-        #particle-canvas {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.4;
-        }
+        .grid-project { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .tech-tag { border: 1px solid #333; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin-right: 0.5rem; }
     </style>
 </head>
 <body>
 
-    <div class="progress-bar" id="progressBar"></div>
-    <div class="timecode" id="timecode">00:00:00:00</div>
+    <div class="cursor-dot" id="dot"></div>
+    <div class="cursor-ring" id="ring"></div>
 
-    <div class="viewport">
-        <canvas id="particle-canvas"></canvas>
+    <div id="scroll-spacer"></div>
+    <main id="scroll-container">
         
-        <div class="camera" id="camera">
-            
-            <div class="scene" id="scene-1">
-                <h2 class="subtitle" style="margin-bottom: 1rem;">INITIATING SEQUENCE</h2>
-                <h1 class="title-main glitch-text" data-text="SUBHADEEP SENGUPTA">SUBHADEEP SENGUPTA</h1>
-                <p class="subtitle">SCROLL TO PLAY</p>
-            </div>
+        <section class="section">
+            <div class="meta-data">DEVELOPER PROFILE // V2.0</div>
+            <h1>Subhadip<br><span style="font-style: italic;">Sengupta</span></h1>
+            <p style="margin-top: 2rem; color: var(--text-muted); max-width: 500px;">
+                Specializing in high-performance web architecture, C/Java backend logic, and 3D procedural generation.
+            </p>
+        </section>
 
-            <div class="scene" id="scene-2">
-                <h1 class="title-main" style="font-size: 4rem; color: var(--accent-red);">BCA SCHOLAR</h1>
-                <h2 class="subtitle" style="font-size: 2rem; color: #fff;">DATM FRAMEWORK</h2>
-                <p style="margin-top: 2rem; max-width: 600px; font-size: 1.2rem; line-height: 1.6; color: #aaa;">
-                    Forged in the disciplines of C and Java architecture. Building robust frameworks while grounding logic in Discrete Mathematics and Linear Algebra.
-                </p>
-            </div>
-
-            <div class="scene" id="scene-3">
-                <div class="hud-chart-container">
-                    <div class="pie-chart" id="hudChart"></div>
+        <section class="section">
+            <div class="grid-project">
+                <div>
+                    <h2 style="font-size: 2rem; margin-bottom: 2rem;">Engineered Solutions</h2>
+                    <div class="tech-tag">Java/C</div>
+                    <div class="tech-tag">Blender 3D</div>
+                    <div class="tech-tag">Android Studio</div>
                 </div>
-                <div class="stats-list">
-                    <div>> Java/C Logic <span>[ 85% ]</span></div>
-                    <div>> Blender 3D Nodes <span>[ 90% ]</span></div>
-                    <div>> Android Studio <span>[ 70% ]</span></div>
-                    <div>> Applied Math <span>[ 80% ]</span></div>
-                    <div style="margin-top: 2rem; font-size: 0.9rem; color: #666;">// RENDERING GEOMETRY_NODES.EXE</div>
+                <div>
+                    <p style="line-height: 1.8; color: var(--text-muted);">
+                        I build interfaces that feel alive. By utilizing custom linear interpolation and scroll-triggered GPU acceleration, 
+                        I transform static data into fluid, interactive experiences.
+                    </p>
                 </div>
             </div>
+        </section>
 
-            <div class="scene" id="scene-4">
-                <h1 class="title-main glitch-text" data-text="AWAITING INPUT">AWAITING INPUT</h1>
-                <p class="subtitle" style="margin-bottom: 3rem;">THE NEXT RENDER BEGINS NOW</p>
-                <a href="#" style="padding: 1rem 3rem; border: 1px solid var(--accent-red); color: white; text-decoration: none; font-family: monospace; letter-spacing: 0.2rem; background: rgba(229, 9, 20, 0.1);">CONTACT.SH</a>
-            </div>
-
-        </div>
-    </div>
+    </main>
 
     <script>
-        // === 1. VIDEO SCROLL & CAMERA FLY-THROUGH LOGIC ===
-        const camera = document.getElementById('camera');
-        const progressBar = document.getElementById('progressBar');
-        const timecode = document.getElementById('timecode');
-        const hudChart = document.getElementById('hudChart');
-        const scenes = document.querySelectorAll('.scene');
+        // Smooth scroll physics
+        const container = document.getElementById('scroll-container');
+        const spacer = document.getElementById('scroll-spacer');
+        let y = 0; let targetY = 0;
         
-        // Define how far apart scenes are on the Z-axis (matches CSS)
-        const sceneDepths = [0, -1500, -3000, -4500];
+        window.addEventListener('scroll', () => targetY = window.scrollY);
         
-        // Map scroll pixel distance to Z-axis movement
-        // 1 pixel scrolled = 2px moved in 3D space
-        const scrollSpeedMultiplier = 2; 
+        function animate() {
+            y += (targetY - y) * 0.08;
+            container.style.transform = `translateY(-${y}px)`;
+            requestAnimationFrame(animate);
+        }
+        
+        // Dynamic resize for spacer
+        window.addEventListener('resize', () => spacer.style.height = container.offsetHeight + 'px');
+        spacer.style.height = container.offsetHeight + 'px';
 
-        window.addEventListener('scroll', () => {
-            // Calculate scroll percentage
-            const scrollTop = window.scrollY;
-            const maxScroll = document.body.scrollHeight - window.innerHeight;
-            const scrollPercent = scrollTop / maxScroll;
-            
-            // Update UI Progress Bar
-            progressBar.style.width = `${scrollPercent * 100}%`;
-            
-            // Update Fake Timecode
-            const frames = Math.floor(scrollPercent * 2400); // simulate 24fps over 100 seconds
-            const s = Math.floor(frames / 24) % 60;
-            const m = Math.floor(frames / (24 * 60));
-            const f = frames % 24;
-            timecode.innerText = `00:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}:${f.toString().padStart(2, '0')}`;
-
-            // Move the camera forward
-            const zMovement = scrollTop * scrollSpeedMultiplier;
-            camera.style.transform = `translateZ(${zMovement}px)`;
-
-            // Manage Scene Opacity based on proximity to the camera
-            scenes.forEach((scene, index) => {
-                const sceneZ = Math.abs(sceneDepths[index]); // Positive distance value
-                const distanceToCamera = sceneZ - zMovement;
-                
-                // Fade in when 800px away, fade out when passed
-                if (distanceToCamera < 800 && distanceToCamera > -300) {
-                    // Normalize opacity between 0 and 1
-                    let opacity = 1 - (Math.abs(distanceToCamera) / 800);
-                    scene.style.opacity = Math.max(0, opacity);
-                    
-                    // Trigger Active Pie Chart when Scene 3 is close
-                    if (index === 2 && opacity > 0.5) {
-                        hudChart.style.background = `conic-gradient(
-                            var(--accent-red) 0% 40%, 
-                            #444 40% 70%, 
-                            #222 70% 85%, 
-                            #111 85% 100%
-                        )`;
-                        hudChart.style.transform = 'scale(1.05)';
-                        hudChart.style.transition = 'all 1s cubic-bezier(0.1, 0.9, 0.2, 1)';
-                    }
-                } else {
-                    scene.style.opacity = 0;
-                    if (index === 2) {
-                        hudChart.style.background = 'conic-gradient(transparent 0%, transparent 100%)';
-                        hudChart.style.transform = 'scale(1)';
-                    }
-                }
-            });
+        // Cursor logic
+        const dot = document.getElementById('dot');
+        const ring = document.getElementById('ring');
+        window.addEventListener('mousemove', e => {
+            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            ring.style.transform = `translate(${e.clientX - 17}px, ${e.clientY - 17}px)`;
         });
 
-        // Trigger initial scroll calculation on load
-        window.dispatchEvent(new Event('scroll'));
-
-        // === 2. CINEMATIC PARTICLE BACKGROUND (GEOMETRY NODES VIBE) ===
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const particles = [];
-        for(let i = 0; i < 100; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                z: Math.random() * 2, // Speed/Depth
-                radius: Math.random() * 1.5
-            });
-        }
-
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            
-            particles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Move particles toward the viewer (simulating space/nodes)
-                p.y += p.z * 2;
-                p.x += (p.x - canvas.width/2) * 0.005; // slight radial spread
-                
-                // Reset if off screen
-                if(p.y > canvas.height || p.x < 0 || p.x > canvas.width) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        animate();
     </script>
 </body>
 </html>
