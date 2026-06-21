@@ -4,66 +4,34 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0a0a">
-<meta name="description" content="Subhadip Sengupta — BCA Scholar, Java &amp; C Developer, 3D Creator. A portfolio told as a samurai's scroll.">
+<meta name="description" content="Subhadip Sengupta — BCA Scholar, Java & C Developer, 3D Creator.">
 <title>Subhadip Sengupta — The Developer's Way</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%94%EF%B8%8F%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 /* ============================================================
-   TOKENS — Optimized for 60fps
+   OPTIMIZED PERFORMANCE CORE
    ============================================================ */
-:root{
-  --void:        #0a0a0a;
-  --ink:         #131110;
-  --ink-soft:    #1c1815;
-  --blood:       #8a0303;
-  --ember:       #c4291a;
-  --gold:        #b8923a;
-  --silver:      #d8d4c8;
-  --paper:       #f3efe4;
-  --ash:         #5a554d;
-  --line:        rgba(216,212,200,0.10);
-
-  --font-display:'Cinzel', serif;
-  --font-body:   'Inter', system-ui, sans-serif;
-  --font-mono:   'JetBrains Mono', ui-monospace, monospace;
-
-  --max-w: 1180px;
-  --pad: clamp(1.5rem, 5vw, 4rem);
-  --ease: cubic-bezier(.19, 1, 0.22, 1); /* Smoother easing curve */
+:root {
+  /* ... (Keep your existing root variables) */
+  --ease-smooth: cubic-bezier(0.19, 1, 0.22, 1);
 }
 
-*{ margin:0; padding:0; box-sizing:border-box; }
-html{
+* { margin:0; padding:0; box-sizing:border-box; }
+html {
   background:var(--void);
   scroll-behavior:smooth;
-  scroll-snap-type: y proximity;
-  -webkit-overflow-scrolling: touch;
-}
-body{
-  background:var(--void);
-  color:var(--paper);
-  font-family:var(--font-body);
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
+  -webkit-overflow-scrolling: touch; /* Butter-smooth touch scrolling */
 }
 
-/* GPU Acceleration */
+/* GPU Acceleration for elements that move */
 .card, .reveal, .tsuba, .btn-draw, .rail button, .hero-content {
   will-change: transform, opacity;
   backface-visibility: hidden;
   perspective: 1000px;
 }
 
-/* Existing styles preserved... */
-.card{
-  background:var(--ink); border:1px solid var(--line);
-  padding:2rem; position:relative; overflow:hidden;
-  transition:transform 0.6s var(--ease), border-color .35s, background .35s;
+/* Enhanced hover effects for premium feel */
+.card {
+  transition: transform 0.6s var(--ease-smooth), border-color 0.3s, background 0.3s;
 }
 
 @keyframes pulse {
@@ -72,56 +40,70 @@ body{
   100% { box-shadow: 0 0 0 0 rgba(138, 3, 3, 0); }
 }
 
-.btn-draw:hover { animation: pulse 1.5s infinite; }
+.btn-draw:hover {
+  animation: pulse 1.5s infinite;
+}
 
-/* ... (Keep your existing CSS from original code below) */
+/* ... (Keep your other existing styles) */
 </style>
 </head>
 <body>
-<div class="social-row">
-  <a href="https://github.com/froxyop-glitch" target="_blank" rel="noopener">GitHub →</a>
-  <a href="https://www.linkedin.com/in/subhadip-sengupta-281828416" target="_blank" rel="noopener">LinkedIn →</a>
-</div>
+
+<section id="p-contact" data-kanji="終" data-label="Contact">
+  <div class="backdrop-img" style="background-image:url('https://images.unsplash.com/photo-1505144808419-1957a94ca61e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=70');"></div>
+  <div class="backdrop-fade"></div>
+  <div class="wrap">
+    <p class="eyebrow" style="justify-content:center;"><span class="kanji">終</span> Final</p>
+    <div class="contact-box reveal">
+      <h2 class="chapter-title" style="font-size:clamp(1.7rem,4vw,2.4rem);">Reach the Dojo</h2>
+      <div class="email-row">
+        <a class="email-link" href="mailto:froxyop@gmail.com">froxyop@gmail.com</a>
+        <button class="copy-btn" id="copyEmail" type="button">Copy email</button>
+      </div>
+      <div class="social-row">
+        <a href="https://github.com/froxyop-glitch" target="_blank" rel="noopener">GitHub →</a>
+        <a href="https://www.linkedin.com/in/subhadip-sengupta-281828416" target="_blank" rel="noopener">LinkedIn →</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <script>
 (function(){
   "use strict";
 
-  // Existing functionality preserved...
-
-  // New Performance & Dynamic Enhancements
-  (function dynamicMotion(){
+  // Optimized Hero Interaction
+  (function heroInteraction(){
     const hero = document.getElementById('hero');
     const content = document.getElementById('hero-content');
     
-    // Parallax & Tilt Effect
+    // Smooth Scroll Parallax
+    window.addEventListener('scroll', () => {
+      const scrolled = window.scrollY;
+      if (scrolled < window.innerHeight) {
+        requestAnimationFrame(() => {
+          content.style.transform = `translateY(${scrolled * 0.4}px)`;
+          content.style.opacity = Math.max(0, 1 - (scrolled / 500));
+        });
+      }
+    }, { passive: true });
+
+    // 3D Tilt Effect on Desktop
     hero.addEventListener('mousemove', (e) => {
       if(window.innerWidth < 1024) return;
-      const x = (e.clientX / window.innerWidth - 0.5) * 20;
-      const y = (e.clientY / window.innerHeight - 0.5) * 20;
+      const { clientX, clientY } = e;
+      const x = (clientX / window.innerWidth - 0.5) * 20;
+      const y = (clientY / window.innerHeight - 0.5) * 20;
       content.style.transform = `perspective(1000px) rotateY(${x}deg) rotateX(${-y}deg)`;
     });
 
+    // Reset tilt on leave
     hero.addEventListener('mouseleave', () => {
       content.style.transform = `perspective(1000px) rotateY(0deg) rotateX(0deg)`;
     });
   })();
 
-  // Optimized Scroll Listener
-  (function optimizedParallax(){
-    const bg = document.getElementById('forest-bg');
-    const content = document.getElementById('hero-content');
-    window.addEventListener('scroll', () => {
-      if(window.scrollY < window.innerHeight) {
-        requestAnimationFrame(() => {
-          content.style.transform = `translateY(${window.scrollY * 0.4}px)`;
-          content.style.opacity = Math.max(0, 1 - (window.scrollY / 500));
-        });
-      }
-    }, { passive: true });
-  })();
-
-  // ... (Keep the rest of your original script functions)
+  // ... (Keep your existing scripts below)
 })();
 </script>
 </body>
